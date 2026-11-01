@@ -1,16 +1,17 @@
-"""Seven model entries and message-format adapters; no inference calls yet.
+"""Eight model entries and message-format adapters; no inference calls yet.
 
-References checked 2026-10-24:
+Model references checked 2026-11-01:
 https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct
-https://qwen.readthedocs.io/en/v2.5/inference/chat.html
-https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3?chat_template=default
-https://developers.openai.com/api/docs/models/gpt-4o-mini
+https://huggingface.co/Qwen/Qwen3.5-9B
+https://huggingface.co/mistralai/Ministral-3-8B-Instruct-2512
+https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017
+https://developers.openai.com/cookbook/articles/gpt-oss/run-transformers
 https://docs.aws.amazon.com/nova/latest/userguide/code-examples-converse.html
 https://platform.claude.com/docs/en/models/sonnet-5-5/overview
-https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash
+https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash-lite
 
-Mistral's v0.3 Instruct checkpoint is provisional. Exact checkpoint revisions,
-API snapshots, AWS region/inference profile, and all decoding settings are TODO.
+Open-weight entries use checkpoint IDs; hosted deployment is not implied.
+Exact revisions, inference backends and decoding settings remain pending.
 """
 from dataclasses import asdict, dataclass
 from typing import Dict, List, Optional
@@ -31,19 +32,14 @@ class ModelSpec:
 
 
 MODELS = {
-    "llama31_8b": ModelSpec("llama31_8b", "Llama 3.1 8B Instruct", "huggingface",
-                            "meta-llama/Llama-3.1-8B-Instruct"),
-    "qwen25_7b": ModelSpec("qwen25_7b", "Qwen 2.5 7B Instruct", "huggingface",
-                           "Qwen/Qwen2.5-7B-Instruct"),
-    "mistral_7b": ModelSpec("mistral_7b", "Mistral 7B Instruct v0.3", "huggingface",
-                           "mistralai/Mistral-7B-Instruct-v0.3"),
-    "gpt4o_mini": ModelSpec("gpt4o_mini", "GPT-4o mini", "openai", "gpt-4o-mini"),
-    "nova_micro": ModelSpec("nova_micro", "Amazon Nova Micro 1.0", "bedrock",
-                           "amazon.nova-micro-v1:0"),
-    "claude_sonnet55": ModelSpec("claude_sonnet55", "Claude Sonnet 5.5", "anthropic",
-                                "claude-sonnet-5-5"),
-    "gemini38_flash": ModelSpec("gemini38_flash", "Gemini 3.8 Flash", "google",
-                               "gemini-3.8-flash"),
+    'llama31_8b': ModelSpec('llama31_8b', 'Llama 3.1 8B Instruct', 'huggingface', 'meta-llama/Llama-3.1-8B-Instruct'),
+    'qwen35_9b': ModelSpec('qwen35_9b', 'Qwen 3.5 9B', 'huggingface', 'Qwen/Qwen3.5-9B'),
+    'ministral3_8b': ModelSpec('ministral3_8b', 'Ministral 3 8B Instruct', 'huggingface', 'mistralai/Ministral-3-8B-Instruct-2512'),
+    'deepseek_v41_flash_1017': ModelSpec('deepseek_v41_flash_1017', 'DeepSeek-V4.1-Flash-1017', 'huggingface', 'deepseek-ai/DeepSeek-V4.1-Flash-1017'),
+    'gpt_oss20b': ModelSpec('gpt_oss20b', 'GPT-oss 20B', 'huggingface', 'openai/gpt-oss-20b'),
+    'nova_micro': ModelSpec('nova_micro', 'Amazon Nova Micro 1.0', 'bedrock', 'amazon.nova-micro-v1:0'),
+    'claude_sonnet55': ModelSpec('claude_sonnet55', 'Claude Sonnet 5.5', 'anthropic', 'claude-sonnet-5-5'),
+    'gemini25_flash_lite': ModelSpec('gemini25_flash_lite', 'Gemini 2.5 Flash-Lite', 'google', 'gemini-2.5-flash-lite'),
 }
 
 
@@ -70,8 +66,8 @@ def split_messages(messages: List[Dict[str, str]]):
 def render_local_chat(model: ModelSpec, request: GenerationRequest, tokenizer) -> str:
     """Use the actual checkpoint tokenizer, never hand-write special tokens.
 
-    Llama/Qwen keep system/user/assistant roles. The selected Mistral v0.3
-    tokenizer accepts an initial system turn and encodes it using its own rules.
+    Each checkpoint tokenizer formats system/user/assistant roles using its
+    own template, including any checkpoint-specific control tokens.
     An incompatible checkpoint/template fails explicitly; roles are not silently
     merged into user content. Return text is for future inference adapters; when
     tokenizing it later, use add_special_tokens=False to avoid duplicate BOS.

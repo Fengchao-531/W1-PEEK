@@ -77,7 +77,7 @@ class GenerationTests(unittest.TestCase):
         prompt = PromptSpec(steps=(PromptStep("first", "First task"),
                                    PromptStep("final", "Next task: {{previous_output}}")))
         backend = FakeBackend(["Actual intermediate output", "word " * 80])
-        result = generate.generate_one("A2", "qwen25_7b", self.domain, backend, prompt)
+        result = generate.generate_one("A2", "qwen35_9b", self.domain, backend, prompt)
         first = backend.requests[0][1]
         last = backend.requests[1][1]
         self.assertFalse(first.is_final)
@@ -92,7 +92,7 @@ class GenerationTests(unittest.TestCase):
         prompt = PromptSpec(steps=self.prompt.steps)
         for count in (79, 80, 150, 151):
             text = "word " * count
-            result = generate.generate_one("A4", "mistral_7b", self.domain,
+            result = generate.generate_one("A4", "ministral3_8b", self.domain,
                                            FakeBackend([text]), prompt)
             self.assertEqual(result.text, text)
             self.assertEqual(result.length_valid, 80 <= count <= 150)
@@ -112,7 +112,7 @@ class GenerationTests(unittest.TestCase):
                 return "rendered by tokenizer"
 
         request = generate.METHODS["A1"].build_request(self.domain, self.prompt)
-        for key in ("llama31_8b", "qwen25_7b", "mistral_7b"):
+        for key in (key for key, model in MODELS.items() if model.provider == "huggingface"):
             tokenizer = Tokenizer()
             self.assertEqual(render_local_chat(MODELS[key], request, tokenizer),
                              "rendered by tokenizer")
@@ -136,7 +136,7 @@ class GenerationTests(unittest.TestCase):
         config["domains"] = [dict(id="a", name="Topic", definition="Criterion")]
         config["samples_per_domain_per_method_per_model"] = 2
         self.assertEqual(generate.describe(config, generate.validate_config(config))[
-            "planned_email_count"], 70)
+            "planned_email_count"], 80)
 
     def test_cli_init_preview_and_prevent_config_overwrite(self):
         script = str(Path(generate.__file__).resolve())
@@ -156,7 +156,7 @@ class GenerationTests(unittest.TestCase):
             path.write_text(json.dumps(config))
             preview = cli("--config", path, "--preview", "--method", "A0")
             self.assertEqual(preview.returncode, 0, preview.stderr)
-            self.assertEqual(len(json.loads(preview.stdout)), 7)
+            self.assertEqual(len(json.loads(preview.stdout)), 8)
 
 
 if __name__ == "__main__":
