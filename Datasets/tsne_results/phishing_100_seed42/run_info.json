@@ -1,0 +1,76 @@
+{
+  "parameters": {
+    "dataset": "phishing",
+    "n_samples": 100,
+    "sample_seed": 42,
+    "perplexity": 15,
+    "tsne_seed": 42,
+    "learning_rate": "auto",
+    "max_iter": 1500,
+    "early_exaggeration": 12,
+    "init": "pca",
+    "svd_components": 50,
+    "max_features": 20000,
+    "color_by": "auto",
+    "threads": 1,
+    "sweep": true,
+    "perplexities": [
+      5,
+      15,
+      30
+    ],
+    "tsne_seeds": [
+      42,
+      7,
+      21
+    ],
+    "output_dir": null
+  },
+  "source": {
+    "path": "/fs04/scratch2/pk79/fche0036/W1-PEEK/Datasets/phishing.csv",
+    "total_rows": 13799,
+    "nonempty_rows": 13799,
+    "empty_rows_removed": 0
+  },
+  "features": {
+    "representation": "word TF-IDF + L2-normalized TruncatedSVD",
+    "ngram_range": [
+      1,
+      2
+    ],
+    "stop_words": "english",
+    "sublinear_tf": true,
+    "vocabulary_size": 11536,
+    "svd_components": 50,
+    "svd_explained_variance_ratio_sum": 0.6229646506836288,
+    "exact_duplicate_texts_in_sample": 0
+  },
+  "color_by": "Dataset",
+  "sample_label_counts": {
+    "phishing": 100
+  },
+  "primary_quality": {
+    "perplexity": 15.0,
+    "tsne_seed": 42,
+    "learning_rate_effective": 50.0,
+    "iterations_completed": 1450,
+    "kl_divergence": 0.6424949169158936,
+    "trustworthiness_original_tfidf": 0.835304347826087,
+    "trustworthiness_svd_input": 0.7993695652173913,
+    "neighbor_overlap_original_tfidf": 0.518,
+    "evaluation_neighbors": 5
+  },
+  "tsne_fixed_parameters": {
+    "n_components": 2,
+    "metric": "euclidean",
+    "method": "barnes_hut",
+    "angle": 0.5
+  },
+  "versions": {
+    "python": "3.9.25",
+    "sklearn": "1.6.1",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3"
+  },
+  "interpretation": "Lexical similarity only. Colors do not train the projection. Cluster sizes and distances between apparent groups are not reliable global distances. Trustworthiness evaluates local neighborhoods, not domain-label correctness. Do not compare KL divergence across different perplexities to select a winner."
+}
